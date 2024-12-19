@@ -3,6 +3,7 @@ const router = express.Router()
 const { authMiddleware } = require('../middleware/authMiddleware')
 const { upload } = require('../config/multerConfig')
 const { register, login, getUserProfile, googleLogin ,updateUserProfile}  = require('../controllers/authController')
+
 router.post('/register', register)
 router.post('/login', login)
 router.post('/google-login', googleLogin);

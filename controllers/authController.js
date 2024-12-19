@@ -1,13 +1,15 @@
 
 const bcrypt = require('bcrypt');
-const User = require('../models/User.js');
+const User = require('../models/user.js');
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 exports.register = async (req, res) => {
+  console.log("dg" , req.body)
+
     try {
-      const { name, email, password ,isAgree} = req.body;
+      const { name, email, password } = req.body;
       if (!name || !email || !password ) {
         return res.status(400).json({ message: "Please provide full name, email, and password" });
       }
@@ -15,7 +17,7 @@ exports.register = async (req, res) => {
       if (existingUser) {
         return res.status(400).json({ message: "Email is already registered" });
       }
-      const user = new User({ "full_name": name, email, password,isAgree });
+      const user = new User({ name, email, password });
       await user.save();
   
       res.status(201).json({ message: "User registered successfully" });
@@ -27,22 +29,26 @@ exports.register = async (req, res) => {
     }
   };
   
-  exports.login = async (req, res) => {
+exports.login = async (req, res) => {
+  console.log("login api ",req.body)
+
     try {
       const { email, password } = req.body;
       if (!email || !password) {
         return res.status(400).json({ message: "Please provide both email and password" });
       }
-  
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid email " });
       }
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: "Invalid  password" });
       }
+  console.log("login  ",process.env.JWT_SECRET)
+
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+      console.log("token", token)
       res.status(200).json({ message: "Login successful", token });
     } catch (error) {
   
@@ -50,10 +56,9 @@ exports.register = async (req, res) => {
     }
   };
 
-  exports.googleLogin = async (req, res) => {
+exports.googleLogin = async (req, res) => {
     try {
       const { tokenId } = req.body;
-      // Verify Google ID Token
       const ticket = await client.verifyIdToken({
         idToken: tokenId,
         audience: process.env.GOOGLE_CLIENT_ID
@@ -65,15 +70,13 @@ exports.register = async (req, res) => {
         return res.status(400).json({ message: 'Invalid Google token' });
       }
   
-      // Check if the user exists
       let user = await User.findOne({ email });
   
       if (!user) {
-        // Create new user if not exists
         user = new User({
           full_name: name,
           email,
-          password: '', // No password for SSO users
+          password: '', 
           userImage: picture
         });
         await user.save();
@@ -92,7 +95,7 @@ exports.register = async (req, res) => {
     }
   };
   
-  exports.getUserProfile = async (req,res) =>{
+exports.getUserProfile = async (req,res) =>{
     try {
       const userId = req.user.id;
       if(!userId) return res.status(401).json({"message": "provide corrct token"})
@@ -106,7 +109,7 @@ exports.register = async (req, res) => {
     }
   }
   
-  exports.updateUserProfile = async (req,res) =>{
+exports.updateUserProfile = async (req,res) =>{
     const userId = req.user.id; 
     const updates = req.body;
     let iconUrl;
