@@ -3,14 +3,14 @@ const HomeCMS = require('../models/CMS/homecms');
 exports.createHomeCMS = async (req, res) => {
     try {
         const data = req.body;
-
         if (req.files) {
             if (req.files.carousel) {
                 data.carousel = req.files.carousel.map((file) => ({
                     imageUrl: `uploads/${file.filename}`,
-                    altText: "",
+                    altText: data.altText || "",
                 }));
             }
+            console.log(req.files)
             if (req.files.popularCategories) {
                 data.popularCategories = JSON.parse(data.popularCategories).map((category, index) => ({
                     ...category,
@@ -20,9 +20,7 @@ exports.createHomeCMS = async (req, res) => {
             if (req.files.portfolio) {
                 data.portfolio.imageUrl = `uploads/${req.files.portfolio[0].filename}`;
             }
-            if (req.files.portfolio) {
-                data.portfolio.imageUrl = `uploads/${req.files.portfolio[0].filename}`;
-            }
+         
             if (req.files.productImages) {
                 data.browseByProduct = {
                     heading: data.browseByProductHeading || "",
@@ -44,12 +42,9 @@ exports.createHomeCMS = async (req, res) => {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
 };
-
 exports.updateHomeCMS = async (req, res) => {
     try {
         const data = req.body;
-
-        // Handle file uploads if any
         const updates = {};
         if (req.files) {
             if (req.files.carousel) {
@@ -77,6 +72,32 @@ exports.updateHomeCMS = async (req, res) => {
                     "portfolio.imageUrl": `uploads/${req.files.portfolio[0].filename}`,
                 };
             }
+            if (req.files.browseByProductImages) {
+                updates.$set = updates.$set || {};
+                updates.$set["browseByProduct.products"] = req.files.browseByProductImages.map((file, index) => ({
+                    ...data.products[index],
+                    imageUrl: `uploads/${file.filename}`,
+                }));
+            }
+        }
+
+        if (data.portfolio) {
+            updates.$set = updates.$set || {};
+            updates.$set["portfolio.title"] = data.portfolio.title;
+            updates.$set["portfolio.paragraph"] = data.portfolio.paragraph;
+            updates.$set["portfolio.buttonText"] = data.portfolio.buttonText;
+        }
+
+        if (data.browseByProduct) {
+            updates.$set = updates.$set || {};
+            updates.$set["browseByProduct.heading"] = data.browseByProduct.heading;
+            updates.$set["browseByProduct.paragraph"] = data.browseByProduct.paragraph;
+        }
+
+        if (data.browseByState) {
+            updates.$set = updates.$set || {};
+            updates.$set["browseByState.heading"] = data.browseByState.heading;
+            updates.$set["browseByState.states"] = data.browseByState.states;
         }
 
         // Update HomeCMS document
@@ -88,8 +109,7 @@ exports.updateHomeCMS = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
-};
-
+}
 // Get HomeCMS Data
 exports.getHomeCMS = async (req, res) => {
     try {

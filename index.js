@@ -15,7 +15,7 @@ app.use(cors());
 app.use('/uploads', express.static('public/uploads'));
 app.use('/api/auth', authRoutes);
 app.use("/api/cms", CMSRoutes);
-app.use("/api/cms", CMSRoutes);
+// app.use("/api/cms", CMSRoutes);
 app.get('/', (req,res) => {
     res.send("hello")
 })
