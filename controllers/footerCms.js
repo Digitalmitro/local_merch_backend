@@ -3,12 +3,9 @@ const FooterCMS = require("../models/CMS/footer");
 
 // Validate MongoDB ObjectId
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
-
-// Create or Update FooterCMS Entry
 exports.createFooter = async (req, res) => {
     try {
       const data = req.body;
-  
       // Check if a footer already exists in the database
       const existingFooter = await FooterCMS.findOne();
   
@@ -68,9 +65,7 @@ exports.deleteFooter = async (req, res) => {
     const id = req.params.id;
     if (!isValidObjectId(id))
       return res.status(400).json({ message: "Invalid ID format" });
-
     const footer = await FooterCMS.findByIdAndDelete(id);
-
     if (!footer) return res.status(404).json({ message: "Footer not found" });
 
     res.status(200).json({ message: "Footer deleted successfully" });

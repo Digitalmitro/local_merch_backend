@@ -7,7 +7,6 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 exports.register = async (req, res) => {
   console.log("dg" , req.body)
-
     try {
       const { name, email, password } = req.body;
       if (!name || !email || !password ) {

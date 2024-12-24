@@ -42,6 +42,7 @@ exports.createHomeCMS = async (req, res) => {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
 };
+
 exports.updateHomeCMS = async (req, res) => {
     try {
         const { id } = req.params; 
@@ -115,6 +116,7 @@ exports.updateHomeCMS = async (req, res) => {
         res.status(500).json({ message: "An error occurred", error: error.message });
     }
 }
+
 // exports.updateFile = async (req, res) => {
 //     try {
 //         const { homeCMSId, objectId } = req.params;

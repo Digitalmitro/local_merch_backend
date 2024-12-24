@@ -7,14 +7,13 @@ const userSchema = new mongoose.Schema({
   email:    {type: String, required: true, unique: true },
   password: {type: String},
   // isSeller: { type: Boolean, default: false },
-  // businesses: [
-  //   { type: mongoose.Schema.Types.ObjectId, ref: 'Business' }
-  // ],
   phone: { type: String, required: false },
   // dob: { type: Date, required: false },
   state: { type: String, required: false },
   area: { type: String, required: false },
   pincode: { type: String, required: false },
+ shop_id: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Shop' }],
+
 });
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();

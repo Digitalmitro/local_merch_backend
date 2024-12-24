@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Get HomeCMS Data
 router.get("/homecms", getHomeCMS);
+
 router.post(
     "/homecms",
     upload.fields([
@@ -16,6 +17,7 @@ router.post(
     ]),
     createHomeCMS
 );
+
 router.put(
     "/homecms/:id",
     upload.fields([
@@ -26,6 +28,7 @@ router.put(
     ]),
     updateHomeCMS
 );
+
 router.put(
     "/updateCms/:homeCMSId/:fieldId",
     upload.fields([
@@ -37,7 +40,7 @@ router.put(
     updateHomeCMSField
 );
 
-// Routes
+// Routes  
 router.post("/footer", createFooter);
 router.get("/footer", getFooter);
 router.put("/footer/:id", updateFooter);
