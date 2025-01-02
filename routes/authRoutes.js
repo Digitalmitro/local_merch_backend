@@ -8,5 +8,5 @@ router.post('/register', register)
 router.post('/login', login)
 router.post('/google-login', googleLogin);
 router.get('/user-profile',authMiddleware, getUserProfile)
-router.put('/update-profile', authMiddleware,upload.single('image'),updateUserProfile)
+router.put('/update-profile', authMiddleware, upload.single('image'), updateUserProfile)
 module.exports = router;

@@ -8,7 +8,9 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 exports.register = async (req, res) => {
   console.log("dg" , req.body)
     try {
-      const { name, email, password } = req.body;
+
+    
+      const { name, email, phone,state,city,area,pincode, password,isSeller } = req.body;
       if (!name || !email || !password ) {
         return res.status(400).json({ message: "Please provide full name, email, and password" });
       }
@@ -16,7 +18,7 @@ exports.register = async (req, res) => {
       if (existingUser) {
         return res.status(400).json({ message: "Email is already registered" });
       }
-      const user = new User({ name, email, password });
+      const user = new User({ name, email,phone,state,city,area,pincode, password,  isSeller, });
       await user.save();
   
       res.status(201).json({ message: "User registered successfully" });
@@ -26,34 +28,61 @@ exports.register = async (req, res) => {
       }
       res.status(500).json({ message: "internal server error" });
     }
-  };
+};
   
-exports.login = async (req, res) => {
-  console.log("login api ",req.body)
-
+  exports.login = async (req, res) => {
     try {
       const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).json({ message: "Please provide both email and password" });
-      }
-      const user = await User.findOne({ email });
+  
+      const user = await User.findOne({ email }).populate('shop_id');
       if (!user) {
-        return res.status(401).json({ message: "Invalid email " });
+        return res.status(404).json({ message: "User not found." });
       }
+  
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
         return res.status(401).json({ message: "Invalid  password" });
       }
-  console.log("login  ",process.env.JWT_SECRET)
-
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-      console.log("token", token)
-      res.status(200).json({ message: "Login successful", token });
-    } catch (error) {
   
-      res.status(500).json({ message: "An error occurred during login" });
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2d' });
+      res.status(200).json({
+        message: "Login successful.",
+        token,
+        isSeller: user.isSeller,
+        shopRegistered: user.shop_id && user.shop_id.length > 0,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error." });
     }
   };
+  
+// exports.login = async (req, res) => {
+//   console.log("login api ",req.body)
+
+//     try {
+//       const { email, password } = req.body;
+//       if (!email || !password) {
+//         return res.status(400).json({ message: "Please provide both email and password" });
+//       }
+//       const user = await User.findOne({ email });
+//       if (!user) {
+//         return res.status(401).json({ message: "Invalid email" });
+//       }
+//       const isPasswordValid = await user.comparePassword(password);
+//       if (!isPasswordValid) {
+//         return res.status(401).json({ message: "Invalid  password" });
+//       }
+//       console.log("login  ",process.env.JWT_SECRET)
+
+//       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+//       console.log("token", token)
+//       res.status(200).json({ message: "Login successful", token });
+//     } catch (error) {
+  
+//       res.status(500).json({ message: "An error occurred during login" });
+//     }
+//   };
 
 exports.googleLogin = async (req, res) => {
     try {
@@ -94,19 +123,29 @@ exports.googleLogin = async (req, res) => {
     }
   };
   
-exports.getUserProfile = async (req,res) =>{
+  exports.getUserProfile = async (req, res) => {
     try {
       const userId = req.user.id;
-      if(!userId) return res.status(401).json({"message": "provide corrct token"})
-      const user = await User.findById(userId).select('-password');
+      if (!userId) return res.status(401).json({ "message": "Provide correct token" });
+  
+      const user = await User.findById(userId).select('-password').populate('shop_id');
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.status(200).json(user);
+  
+      // Check if the user is a seller and has a shop_id
+      const isSeller = user.isSeller;
+      const hasShop = user.shop_id && user.shop_id.length > 0;
+  
+      res.status(200).json({
+        user,
+        isSeller,
+        hasShop
+      });
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
-  }
+  };
   
 exports.updateUserProfile = async (req,res) =>{
     const userId = req.user.id; 
@@ -137,4 +176,6 @@ exports.updateUserProfile = async (req,res) =>{
         });
     }
   }
+
+
   

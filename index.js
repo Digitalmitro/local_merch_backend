@@ -8,7 +8,6 @@ const productRoutes = require('./routes/productRouter')
 const shopRoutes = require('./routes/shopRoutes')
 require("dotenv").config()
 connectDB()
-
 const app = express()
 const port = process.env.PORT
 app.use(express.json());
